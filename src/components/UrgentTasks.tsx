@@ -10,36 +10,39 @@ interface UrgentTasksProps {
 
 const UrgentTasks: React.FC<UrgentTasksProps> = ({ urgentTasks, onAddTask, onEditTask }) => {
   return (
-    <section className="space-y-4">
-      <div>
-        <h2 className="text-xl font-bold text-white mb-2">Urgent tasks</h2>
-        {urgentTasks.length > 0 ? (
-          urgentTasks.map(task => (
-            <div 
-              key={task.id} 
-              className="flex items-center justify-between bg-red-900/20 border border-red-500/30 rounded-lg p-4 mb-3 hover:bg-red-900/30 transition-colors cursor-pointer"
-              onClick={() => onEditTask?.(task)}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <AlertTriangle size={16} className="text-white" />
+    <div className="space-y-4">
+      {urgentTasks.length > 0 ? (
+        urgentTasks.map(task => (
+          <div 
+            key={task.id} 
+            className="card-modern cursor-pointer group animate-fade-in-up"
+            onClick={() => onEditTask?.(task)}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="w-10 h-10 gradient-danger rounded-xl flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle size={20} className="text-white" />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-white font-medium">{task.title}</span>
-                    <span className="text-red-400 text-xs font-medium">URGENT</span>
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <span className="text-white font-semibold group-hover:text-purple-200 transition-colors">
+                      {task.title}
+                    </span>
+                    <span className="px-2 py-1 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 text-xs font-medium">
+                      URGENT
+                    </span>
                   </div>
-                  <div className="flex items-center gap-4 mt-1 text-xs text-gray-300">
-                    <div className="flex items-center gap-1">
-                      <Calendar size={12} />
+                  <div className="flex items-center space-x-4 text-sm text-white/70">
+                    <div className="flex items-center space-x-1">
+                      <Calendar size={14} />
                       <span>{new Date(task.date).toLocaleDateString('en-US', { 
                         month: 'short', 
                         day: 'numeric'
                       })}</span>
                     </div>
                     {task.startTime && task.endTime && (
-                      <div className="flex items-center gap-1">
-                        <Clock size={12} />
+                      <div className="flex items-center space-x-1">
+                        <Clock size={14} />
                         <span>{task.startTime} - {task.endTime}</span>
                       </div>
                     )}
@@ -52,27 +55,30 @@ const UrgentTasks: React.FC<UrgentTasksProps> = ({ urgentTasks, onAddTask, onEdi
                 ) : task.daysLeft && task.daysLeft > 0 ? (
                   <div className="text-red-400 text-sm font-bold">{task.daysLeft} days left</div>
                 ) : (
-                  <div className="text-gray-400 text-sm font-bold">Overdue</div>
+                  <div className="text-white/50 text-sm font-bold">Overdue</div>
                 )}
-                <div className="text-gray-400 text-xs">{task.progress}% complete</div>
+                <div className="text-white/50 text-xs mt-1">{task.progress}% complete</div>
               </div>
             </div>
-          ))
-        ) : (
-          <div className="bg-gray-800 rounded-lg p-4 mb-2">
-            <p className="text-gray-400 text-sm text-center">No urgent tasks</p>
           </div>
-        )}
-      </div>
+        ))
+      ) : (
+        <div className="card-modern text-center py-8 animate-fade-in-up">
+          <div className="w-12 h-12 gradient-danger rounded-xl flex items-center justify-center mx-auto mb-3">
+            <AlertTriangle size={24} className="text-white" />
+          </div>
+          <p className="text-white/70 text-sm">No urgent tasks</p>
+        </div>
+      )}
       
       <button
         onClick={onAddTask}
-        className="w-full bg-gradient-to-r from-purple-500 to-purple-700 rounded-xl p-4 flex items-center justify-center gap-2 text-white font-semibold hover:from-purple-600 hover:to-purple-800 transition-all duration-200"
+        className="btn-modern w-full flex items-center justify-center space-x-2"
       >
-        <Plus size={20} />
-        Add new task
+        <Plus size={20} className="text-white" />
+        <span>Add new task</span>
       </button>
-    </section>
+    </div>
   );
 };
 

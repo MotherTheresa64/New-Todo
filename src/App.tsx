@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, AlertTriangle } from 'lucide-react';
 import Header from './components/Header';
 import TaskCard from './components/TaskCard';
 import UrgentTasks from './components/UrgentTasks';
@@ -195,82 +195,111 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <Header />
-        
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6 mt-6">
-          {/* Main Content Area */}
-          <div className="lg:col-span-3 space-y-4 md:space-y-6">
-            {/* All Tasks Section */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-bold text-white">My Tasks</h2>
-                  <p className="text-gray-300 text-sm">
-                    {progress.completed}/{progress.total} task done
-                  </p>
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600">
+      <Header />
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Main content - 3 columns */}
+          <div className="lg:col-span-3 space-y-8">
+            {/* Add Task Button */}
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-2">My Tasks</h2>
+                <p className="text-white/70">
+                  {progress.total === 0 
+                    ? "No tasks yet. Create your first task to get started!" 
+                    : `${progress.completed} of ${progress.total} tasks completed`
+                  }
+                </p>
+              </div>
+              <button
+                onClick={handleAddTask}
+                className="btn-modern flex items-center space-x-2"
+              >
+                <Plus size={20} className="text-white" />
+                <span>Add Task</span>
+              </button>
+            </div>
+
+            {/* Tasks Grid */}
+            {tasksForSelectedDate.length === 0 ? (
+              <div className="card-modern text-center py-12 animate-fade-in-up">
+                <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Plus size={32} className="text-white" />
                 </div>
+                <h3 className="text-xl font-semibold text-white mb-2">No tasks for this date</h3>
+                <p className="text-white/70 mb-6">Create a new task to get started with your productivity journey</p>
                 <button
                   onClick={handleAddTask}
-                  className="bg-gradient-to-r from-purple-500 to-purple-700 rounded-lg px-4 py-2 flex items-center gap-2 text-white font-semibold hover:from-purple-600 hover:to-purple-800 transition-all duration-200"
+                  className="btn-modern"
                 >
-                  <Plus size={16} />
-                  Add Task
+                  Create Your First Task
                 </button>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {tasks.length > 0 ? (
-                  tasks.filter(task => task.date === currentViewDate).map(task => (
-                    <TaskCard 
-                      key={task.id} 
-                      task={task} 
-                      variant="small" 
-                      onEdit={handleEditTask}
-                    />
-                  ))
-                ) : (
-                  <div className="col-span-full">
-                    <div className="bg-gray-800 rounded-lg p-8 text-center">
-                      <p className="text-gray-400 text-sm mb-4">No tasks scheduled for this date</p>
-                      <button
-                        onClick={handleAddTask}
-                        className="bg-gradient-to-r from-purple-500 to-purple-700 rounded-lg px-6 py-3 flex items-center gap-2 text-white font-semibold hover:from-purple-600 hover:to-purple-800 transition-all duration-200 mx-auto"
-                      >
-                        <Plus size={18} />
-                        Add task for this date
-                      </button>
-                    </div>
-                  </div>
-                )}
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {tasksForSelectedDate.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onClick={() => handleEditTask(task)}
+                  />
+                ))}
               </div>
-            </div>
-            
+            )}
+
             {/* Urgent Tasks Section */}
-            <UrgentTasks urgentTasks={urgentTasks} onAddTask={handleAddTask} onEditTask={handleEditTask} />
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold text-white flex items-center space-x-2">
+                <AlertTriangle size={24} className="text-red-400" />
+                <span>Urgent Tasks</span>
+              </h3>
+              <UrgentTasks 
+                urgentTasks={urgentTasks} 
+                onAddTask={handleAddTask}
+                onEditTask={handleEditTask}
+              />
+            </div>
           </div>
-          
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-4 md:space-y-6">
-            <Calendar onDateSelect={handleDateSelect} selectedDate={currentViewDate} />
-            <TodaysTasks tasks={sidebarTasks} />
+
+          {/* Sidebar - 1 column */}
+          <div className="space-y-6">
+            {/* Calendar */}
+            <div className="card-modern">
+              <Calendar
+                selectedDate={currentViewDate}
+                onDateSelect={handleDateSelect}
+              />
+            </div>
+
+            {/* Today's Tasks */}
+            <div className="card-modern">
+              <TodaysTasks tasks={sidebarTasks} />
+            </div>
           </div>
         </div>
-      </div>
+      </main>
 
-      <TaskModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleSaveTask}
-        onSaveAndClose={handleSaveAndClose}
-        onDelete={handleDeleteTask}
-        onToggleSubtask={handleToggleSubtask}
-        onAddSubtask={handleAddSubtask}
-        onDeleteSubtask={handleDeleteSubtask}
-        task={selectedTask}
-        selectedDate={undefined} // Removed selectedDate prop as it's not used in the modal
-      />
+      {/* Task Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <TaskModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              onSave={handleSaveTask}
+              onSaveAndClose={handleSaveAndClose}
+              onDelete={handleDeleteTask}
+              onToggleSubtask={handleToggleSubtask}
+              onAddSubtask={handleAddSubtask}
+              onDeleteSubtask={handleDeleteSubtask}
+              task={selectedTask}
+              selectedDate={undefined}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
