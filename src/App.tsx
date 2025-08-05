@@ -1,18 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import Header from './components/Header';
 import TaskCard from './components/TaskCard';
-import TaskProgress from './components/TaskProgress';
 import UrgentTasks from './components/UrgentTasks';
 import Calendar from './components/Calendar';
 import TodaysTasks from './components/TodaysTasks';
 import TaskModal from './components/TaskModal';
+import Login from './components/Login';
 import { useTasks } from './hooks/useTasks';
+import { useAuth } from './contexts/AuthContext';
 import { Task } from './types';
 
 const App: React.FC = () => {
+  const { currentUser } = useAuth();
   const {
     tasks,
+    loading,
+    error,
     addTask,
     updateTask,
     deleteTask,
@@ -21,106 +25,173 @@ const App: React.FC = () => {
     deleteSubtask,
     getTasksByDate,
     getUrgentTasks,
-    getTaskProgress,
   } = useTasks();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | undefined>();
-  const [selectedDate, setSelectedDate] = useState<string | undefined>();
   const [currentViewDate, setCurrentViewDate] = useState(new Date().toISOString().split('T')[0]);
+  const [urgentTasks, setUrgentTasks] = useState<Task[]>([]);
+  const [todaysTasks, setTodaysTasks] = useState<Task[]>([]);
+
+  // Load urgent tasks and today's tasks when date changes
+  useEffect(() => {
+    const loadTasksForDate = async () => {
+      try {
+        const [urgent, today] = await Promise.all([
+          getUrgentTasks(),
+          getTasksByDate(currentViewDate)
+        ]);
+        
+        // Process urgent tasks
+        const processedUrgentTasks = urgent.filter(task => {
+          const taskDate = new Date(task.date);
+          const selectedDate = new Date(currentViewDate);
+          const today = new Date();
+          
+          // Show urgent tasks for the selected date
+          if (task.date === currentViewDate) return true;
+          
+          // Show upcoming urgent tasks (future dates)
+          if (taskDate > today) return true;
+          
+          // Don't show past due urgent tasks unless it's the selected date
+          return false;
+        }).map(task => {
+          // Calculate days left based on selected date
+          const taskDate = new Date(task.date);
+          const selectedDate = new Date(currentViewDate);
+          const daysLeft = Math.ceil((taskDate.getTime() - selectedDate.getTime()) / (1000 * 60 * 60 * 24));
+          
+          return {
+            ...task,
+            daysLeft: daysLeft > 0 ? daysLeft : 0,
+            isDueToday: daysLeft === 0
+          };
+        });
+
+        setUrgentTasks(processedUrgentTasks);
+        setTodaysTasks(today);
+      } catch (err) {
+        console.error('Error loading tasks for date:', err);
+      }
+    };
+
+    if (currentUser) {
+      loadTasksForDate();
+    }
+  }, [currentUser, currentViewDate, getUrgentTasks, getTasksByDate]);
+
+  // If user is not authenticated, show login screen
+  if (!currentUser) {
+    return <Login />;
+  }
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <p className="text-white">Loading your tasks...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Get tasks for the selected date
   const tasksForSelectedDate = tasks.filter(task => task.date === currentViewDate);
   const completedTasksForDate = tasksForSelectedDate.filter(task => task.progress === 100).length;
   const progress = { completed: completedTasksForDate, total: tasksForSelectedDate.length };
-  // Get urgent tasks for the selected date or upcoming urgent tasks
-  const urgentTasks = getUrgentTasks().filter(task => {
-    const taskDate = new Date(task.date);
-    const selectedDate = new Date(currentViewDate);
-    const today = new Date();
-    
-    // Show urgent tasks for the selected date
-    if (task.date === currentViewDate) return true;
-    
-    // Show upcoming urgent tasks (future dates)
-    if (taskDate > today) return true;
-    
-    // Don't show past due urgent tasks unless it's the selected date
-    return false;
-  }).map(task => {
-    // Calculate days left based on selected date
-    const taskDate = new Date(task.date);
-    const selectedDate = new Date(currentViewDate);
-    const daysLeft = Math.ceil((taskDate.getTime() - selectedDate.getTime()) / (1000 * 60 * 60 * 24));
-    
-    return {
-      ...task,
-      daysLeft: daysLeft > 0 ? daysLeft : 0,
-      isDueToday: daysLeft === 0
-    };
-  });
-  // const todaysTasks = getTasksByDate(currentViewDate);
-  
-  // Get the main featured task (first task for demo)
-  const featuredTask = tasks[0] || null;
-  
-  // Get tasks for progress section (show up to 3 tasks, excluding the featured task)
-  const progressTasks = tasks.slice(1, 4).filter(Boolean);
   
   // For the sidebar, show tasks for the selected date
-  const todaysTasks = getTasksByDate(currentViewDate);
   const sidebarTasks = todaysTasks.length > 0 ? todaysTasks.slice(0, 2) : [];
 
   const handleAddTask = () => {
     setSelectedTask(undefined);
-    setSelectedDate(undefined);
     setIsModalOpen(true);
   };
 
   const handleEditTask = (task: Task) => {
     setSelectedTask(task);
-    setSelectedDate(undefined);
     setIsModalOpen(true);
   };
 
-  const handleSaveTask = (taskData: Omit<Task, 'id'>) => {
-    if (selectedTask) {
-      updateTask(selectedTask.id, taskData);
-    } else {
-      addTask(taskData);
+  const handleSaveTask = async (taskData: Omit<Task, 'id'>) => {
+    try {
+      if (selectedTask) {
+        await updateTask(selectedTask.id, taskData);
+      } else {
+        await addTask(taskData);
+      }
+    } catch (err) {
+      console.error('Error saving task:', err);
     }
   };
 
-  const handleSaveAndClose = (taskData: Omit<Task, 'id'>) => {
-    if (selectedTask) {
-      updateTask(selectedTask.id, taskData);
-    } else {
-      addTask(taskData);
+  const handleSaveAndClose = async (taskData: Omit<Task, 'id'>) => {
+    try {
+      if (selectedTask) {
+        await updateTask(selectedTask.id, taskData);
+      } else {
+        await addTask(taskData);
+      }
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error('Error saving task:', err);
     }
-    setIsModalOpen(false);
   };
 
   const handleDateSelect = (date: string) => {
     setCurrentViewDate(date);
-    // Don't open modal, just update the date filter
   };
 
-  const handleDeleteTask = (id: string) => {
-    deleteTask(id);
+  const handleDeleteTask = async (id: string) => {
+    try {
+      await deleteTask(id);
+    } catch (err) {
+      console.error('Error deleting task:', err);
+    }
   };
 
-
-
-  const handleToggleSubtask = (taskId: string, subtaskId: string) => {
-    toggleSubtask(taskId, subtaskId);
+  const handleToggleSubtask = async (taskId: string, subtaskId: string) => {
+    try {
+      await toggleSubtask(taskId, subtaskId);
+    } catch (err) {
+      console.error('Error toggling subtask:', err);
+    }
   };
 
-  const handleAddSubtask = (taskId: string, title: string) => {
-    addSubtask(taskId, title);
+  const handleAddSubtask = async (taskId: string, title: string) => {
+    try {
+      await addSubtask(taskId, title);
+    } catch (err) {
+      console.error('Error adding subtask:', err);
+    }
   };
 
-  const handleDeleteSubtask = (taskId: string, subtaskId: string) => {
-    deleteSubtask(taskId, subtaskId);
+  const handleDeleteSubtask = async (taskId: string, subtaskId: string) => {
+    try {
+      await deleteSubtask(taskId, subtaskId);
+    } catch (err) {
+      console.error('Error deleting subtask:', err);
+    }
   };
 
   return (
@@ -198,7 +269,7 @@ const App: React.FC = () => {
         onAddSubtask={handleAddSubtask}
         onDeleteSubtask={handleDeleteSubtask}
         task={selectedTask}
-        selectedDate={selectedDate}
+        selectedDate={undefined} // Removed selectedDate prop as it's not used in the modal
       />
     </div>
   );

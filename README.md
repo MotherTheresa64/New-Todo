@@ -1,40 +1,37 @@
 # Modern Todo Application
 
-A beautiful, mobile-responsive todo application built with React, TypeScript, and Tailwind CSS. This application features a dark theme with gradient cards, task progress tracking, calendar view, and modern UI design.
+A beautiful, mobile-compatible todo application built with React, TypeScript, and Tailwind CSS.
 
 ## Features
 
-- 🎨 **Modern Dark Theme** - Beautiful gradient cards and dark UI
-- 📱 **Mobile Responsive** - Works perfectly on all device sizes
-- 📊 **Task Progress Tracking** - Visual progress indicators and statistics
-- 📅 **Calendar Integration** - Monthly calendar view with current day highlighting
-- ⚡ **Real-time Updates** - Dynamic task management
-- 🎯 **Urgent Tasks** - Priority task highlighting
-- 📈 **Progress Visualization** - Circular and linear progress bars
+- 📱 **Mobile-First Design** - Fully responsive across all devices
+- 📅 **Interactive Calendar** - Click dates to filter tasks
+- ✅ **Subtasks System** - Break down tasks into manageable steps
+- 🚨 **Urgent Tasks** - Flag important tasks with priority indicators
+- 🎨 **Modern UI** - Clean, intuitive interface with smooth animations
+- 📊 **Progress Tracking** - Visual progress indicators for task completion
+- 🔄 **Real-time Updates** - Instant task management and status changes
 
-## Screenshots
+## Tech Stack
 
-The application features:
-- Header with user greeting and navigation icons
-- Large featured task card with progress indicator
-- Task progress section with multiple task cards
-- Urgent tasks section with "Add new task" button
-- Sidebar with calendar and today's tasks
-- Mobile-responsive design that adapts to different screen sizes
+- **React 18** - Modern React with hooks
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first styling
+- **Lucide React** - Beautiful icons
+- **date-fns** - Date manipulation utilities
 
 ## Getting Started
 
 ### Prerequisites
-
-- Node.js (version 14 or higher)
+- Node.js (v14 or higher)
 - npm or yarn
 
 ### Installation
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd todo-app
+git clone https://github.com/MotherTheresa64/New-Todo.git
+cd New-Todo
 ```
 
 2. Install dependencies:
@@ -47,83 +44,60 @@ npm install
 npm start
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Push your code to GitHub
+2. Connect your repository to [Vercel](https://vercel.com)
+3. Deploy automatically with zero configuration
+
+### Manual Build
+
+```bash
+npm run build
+```
+
+The build folder will contain your production-ready application.
+
+## Usage
+
+### Adding Tasks
+- Click the "+" button to add a new task
+- Set title, description, date due, and time
+- Add subtasks to break down complex tasks
+- Flag as urgent if needed
+
+### Managing Tasks
+- Click any task to edit it
+- Toggle subtasks to track progress
+- Mark tasks as urgent to move them to priority section
+- Delete tasks when completed
+
+### Calendar Navigation
+- Click dates on the calendar to filter tasks
+- View tasks specific to selected dates
+- See urgent tasks with days remaining
 
 ## Project Structure
 
 ```
 src/
-├── components/          # React components
-│   ├── Header.tsx      # Application header
-│   ├── TaskCard.tsx    # Reusable task card component
-│   ├── TaskProgress.tsx # Task progress section
-│   ├── UrgentTasks.tsx # Urgent tasks section
-│   ├── Calendar.tsx    # Calendar component
-│   └── TodaysTasks.tsx # Today's tasks component
-├── data/
-│   └── mockData.ts     # Mock data for demonstration
-├── types/
-│   └── index.ts        # TypeScript type definitions
-├── App.tsx             # Main application component
-├── index.tsx           # Application entry point
-└── index.css           # Global styles and Tailwind CSS
+├── components/     # Reusable UI components
+├── hooks/         # Custom React hooks
+├── types/         # TypeScript type definitions
+├── data/          # Mock data and utilities
+└── App.tsx        # Main application component
 ```
-
-## Technologies Used
-
-- **React 18** - Modern React with hooks
-- **TypeScript** - Type-safe development
-- **Tailwind CSS** - Utility-first CSS framework
-- **Lucide React** - Beautiful icons
-- **date-fns** - Date manipulation utilities
-
-## Mobile Compatibility
-
-The application is fully responsive and includes:
-
-- **Flexible Grid Layout** - Adapts from 1 column on mobile to 4 columns on desktop
-- **Touch-Friendly Buttons** - Proper sizing for mobile interaction
-- **Readable Typography** - Optimized font sizes for mobile screens
-- **Optimized Spacing** - Appropriate padding and margins for mobile
-- **Smooth Animations** - Performance-optimized transitions
-
-## Customization
-
-### Colors and Themes
-
-The application uses a dark theme with gradient cards. You can customize the colors by modifying:
-
-- `tailwind.config.js` - Tailwind configuration
-- `src/index.css` - Global styles
-- Component-specific gradient classes
-
-### Adding New Features
-
-1. **New Task Types**: Extend the `Task` interface in `src/types/index.ts`
-2. **Additional Components**: Create new components in `src/components/`
-3. **Data Management**: Modify `src/data/mockData.ts` or integrate with a backend
-
-## Available Scripts
-
-- `npm start` - Runs the app in development mode
-- `npm run build` - Builds the app for production
-- `npm test` - Launches the test runner
-- `npm run eject` - Ejects from Create React App (not recommended)
-
-## Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+4. Submit a pull request
 
 ## License
 
