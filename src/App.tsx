@@ -11,6 +11,7 @@ import { useTasks } from './hooks/useTasks';
 import { useAuth } from './contexts/AuthContext';
 import { Task } from './types';
 
+// Enhanced App component with amazing animations and lively interactions
 const App: React.FC = () => {
   const { currentUser } = useAuth();
   const {
