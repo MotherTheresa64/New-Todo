@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, AlertTriangle } from 'lucide-react';
+import { Plus, AlertTriangle, Sparkles, Zap, Star } from 'lucide-react';
 import Header from './components/Header';
 import TaskCard from './components/TaskCard';
 import UrgentTasks from './components/UrgentTasks';
@@ -32,6 +32,7 @@ const App: React.FC = () => {
   const [currentViewDate, setCurrentViewDate] = useState(new Date().toISOString().split('T')[0]);
   const [urgentTasks, setUrgentTasks] = useState<Task[]>([]);
   const [todaysTasks, setTodaysTasks] = useState<Task[]>([]);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // Load urgent tasks and today's tasks when date changes
   useEffect(() => {
@@ -81,33 +82,70 @@ const App: React.FC = () => {
     }
   }, [currentUser, currentViewDate, getUrgentTasks, getTasksByDate]);
 
+  // Show confetti when all tasks are completed
+  useEffect(() => {
+    const tasksForSelectedDate = tasks.filter(task => task.date === currentViewDate);
+    const completedTasks = tasksForSelectedDate.filter(task => task.progress === 100);
+    
+    if (tasksForSelectedDate.length > 0 && completedTasks.length === tasksForSelectedDate.length) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 3000);
+    }
+  }, [tasks, currentViewDate]);
+
   // If user is not authenticated, show login screen
   if (!currentUser) {
     return <Login />;
   }
 
-  // Show loading state
+  // Show loading state with enhanced animation
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
-          <p className="text-white">Loading your tasks...</p>
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 flex items-center justify-center relative overflow-hidden">
+        {/* Animated background particles */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 bg-white/20 rounded-full animate-float"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${3 + Math.random() * 2}s`
+              }}
+            />
+          ))}
+        </div>
+        
+        <div className="text-center relative z-10">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-white/30 border-t-white mx-auto mb-6"></div>
+            <div className="absolute inset-0 animate-pulse">
+              <Sparkles className="w-8 h-8 text-white/60 mx-auto" />
+            </div>
+          </div>
+          <p className="text-white text-lg font-medium animate-pulse">Loading your tasks...</p>
+          <p className="text-white/60 text-sm mt-2 animate-fade-in-up">Preparing your productivity dashboard</p>
         </div>
       </div>
     );
   }
 
-  // Show error state
+  // Show error state with retry animation
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-400 mb-4">{error}</p>
+      <div className="min-h-screen bg-gradient-to-br from-red-600 via-pink-600 to-purple-600 flex items-center justify-center">
+        <div className="text-center animate-bounce-slow">
+          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <AlertTriangle className="w-8 h-8 text-white" />
+          </div>
+          <p className="text-white mb-4 text-lg">{error}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg"
+            className="btn-modern animate-glow"
           >
+            <Zap className="w-4 h-4 mr-2" />
             Retry
           </button>
         </div>
@@ -195,17 +233,67 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600">
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 relative overflow-hidden">
+      {/* Animated background particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-white/10 rounded-full animate-float"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${4 + Math.random() * 3}s`
+            }}
+          />
+        ))}
+        {[...Array(8)].map((_, i) => (
+          <div
+            key={`star-${i}`}
+            className="absolute text-white/20 animate-pulse-slow"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 2}s`
+            }}
+          >
+            <Star className="w-3 h-3" />
+          </div>
+        ))}
+      </div>
+
+      {/* Confetti effect */}
+      {showConfetti && (
+        <div className="absolute inset-0 pointer-events-none z-50">
+          {[...Array(50)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 bg-yellow-400 rounded-full animate-bounce"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: '-10px',
+                animationDelay: `${Math.random() * 2}s`,
+                animationDuration: `${2 + Math.random() * 2}s`
+              }}
+            />
+          ))}
+        </div>
+      )}
+
       <Header />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main content - 3 columns */}
           <div className="lg:col-span-3 space-y-8">
-            {/* Add Task Button */}
-            <div className="flex justify-between items-center">
+            {/* Add Task Button with enhanced animation */}
+            <div className="flex justify-between items-center animate-fade-in-up">
               <div>
-                <h2 className="text-2xl font-bold text-white mb-2">My Tasks</h2>
+                <h2 className="text-2xl font-bold text-white mb-2 flex items-center">
+                  <Sparkles className="w-6 h-6 mr-2 animate-pulse-slow" />
+                  My Tasks
+                </h2>
                 <p className="text-white/70">
                   {progress.total === 0 
                     ? "No tasks yet. Create your first task to get started!" 
@@ -215,44 +303,49 @@ const App: React.FC = () => {
               </div>
               <button
                 onClick={handleAddTask}
-                className="btn-modern flex items-center space-x-2"
+                className="btn-modern flex items-center space-x-2 ripple hover-glow animate-pulse-slow"
               >
                 <Plus size={20} className="text-white" />
                 <span>Add Task</span>
               </button>
             </div>
 
-            {/* Tasks Grid */}
+            {/* Tasks Grid with staggered animations */}
             {tasksForSelectedDate.length === 0 ? (
-              <div className="card-modern text-center py-12 animate-fade-in-up">
-                <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <div className="card-modern text-center py-12 animate-fade-in-up hover-lift">
+                <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4 animate-float">
                   <Plus size={32} className="text-white" />
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-2">No tasks for this date</h3>
                 <p className="text-white/70 mb-6">Create a new task to get started with your productivity journey</p>
                 <button
                   onClick={handleAddTask}
-                  className="btn-modern"
+                  className="btn-modern ripple hover-glow"
                 >
                   Create Your First Task
                 </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {tasksForSelectedDate.map((task) => (
-                  <TaskCard
+                {tasksForSelectedDate.map((task, index) => (
+                  <div
                     key={task.id}
-                    task={task}
-                    onClick={() => handleEditTask(task)}
-                  />
+                    className="animate-fade-in-up"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <TaskCard
+                      task={task}
+                      onClick={() => handleEditTask(task)}
+                    />
+                  </div>
                 ))}
               </div>
             )}
 
-            {/* Urgent Tasks Section */}
-            <div className="space-y-4">
+            {/* Urgent Tasks Section with enhanced styling */}
+            <div className="space-y-4 animate-slide-in-right">
               <h3 className="text-xl font-bold text-white flex items-center space-x-2">
-                <AlertTriangle size={24} className="text-red-400" />
+                <AlertTriangle size={24} className="text-red-400 animate-pulse" />
                 <span>Urgent Tasks</span>
               </h3>
               <UrgentTasks 
@@ -263,28 +356,28 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          {/* Sidebar - 1 column */}
+          {/* Sidebar - 1 column with animations */}
           <div className="space-y-6">
-            {/* Calendar */}
-            <div className="card-modern">
+            {/* Calendar with enhanced animation */}
+            <div className="card-modern animate-fade-in-up hover-lift">
               <Calendar
                 selectedDate={currentViewDate}
                 onDateSelect={handleDateSelect}
               />
             </div>
 
-            {/* Today's Tasks */}
-            <div className="card-modern">
+            {/* Today's Tasks with animation */}
+            <div className="card-modern animate-slide-in-right hover-lift">
               <TodaysTasks tasks={sidebarTasks} />
             </div>
           </div>
         </div>
       </main>
 
-      {/* Task Modal */}
+      {/* Task Modal with enhanced backdrop */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in-up">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-fade-in-up">
             <TaskModal
               isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}
