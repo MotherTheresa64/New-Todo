@@ -285,6 +285,12 @@ const App: React.FC = () => {
       <Header />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+        {/* TEST added test message to verify Vercel deployment */}
+        <div className="text-center mb-6 p-4 bg-gradient-to-r from-green-400 to-blue-500 rounded-xl animate-fade-in-up">
+          <h2 className="text-2xl font-bold text-white mb-2">🚀 Vercel Test - Deployment Working!</h2>
+          <p className="text-white/90">If you can see this message, the Vercel deployment is working correctly!</p>
+        </div>
+        
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main content - 3 columns */}
           <div className="lg:col-span-3 space-y-8">
